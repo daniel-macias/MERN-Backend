@@ -11,6 +11,7 @@ exports.register = async (req, res, next) => {
             username,
             email,
             password,
+            notes: []
         });
 
         sendToken(user, 201, res);

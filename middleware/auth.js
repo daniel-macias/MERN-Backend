@@ -1,31 +1,22 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
-const ErrorResponse = require('../utils/errorResponse');
 
-exports.protect = async (req, res, next) => {
-    let token;
+const HttpError = require('../models/http-error');
 
-    if(req.headers.authorization && req.headers.authorization.startsWith("Bearer")){
-        token = req.headers.authorization.split(" ")[1];
+module.exports = (req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    return next();
+  }
+  try {
+    const token = req.headers.authorization.split(' ')[1]; // Authorization: 'Bearer TOKEN'
+    if (!token) {
+      throw new Error('Authentication failed!');
     }
-
-    if(!token){
-        return next(new ErrorResponse("Unauthorized attempt to access this route", 401));
-    }
-
-    try{
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-        const user = await User.findById(decoded.id);
-
-        if(!user){
-            return next(new ErrorResponse("No user found with this id", 404));
-        }
-
-        req.user = user;
-
-        next();
-    } catch (error) {
-        return next(new ErrorResponse("Unauthorized attempt to access this route", 401));
-    }
-}
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    req.userData = { userId: decodedToken.id };
+    console.log(req.userData);
+    next();
+  } catch (err) {
+    const error = new HttpError('Authentication failed!', 403);
+    return next(error);
+  }
+};

@@ -24,6 +24,7 @@ const UserSchema = new mongoose.Schema({
         minlength: 6,
         select: false,
     },
+    notes: [{ type: mongoose.Types.ObjectId, required: true, ref: 'Note' }],
     resetPasswordToken: String,
     resetPasswordExpire: Date,
 });
