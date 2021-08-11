@@ -1,8 +1,19 @@
 const express = require('express');
-const router = express.Router();
-const { getPrivateData } = require('../controllers/private');
-const { protect } = require('../middleware/auth');
+const { getPrivateData } = require('../controllers/private'); //Aqui luego hay que cambiarlo por el home
+const notesController = require('../controllers/notes-controller');
 
-router.route("/").get(protect, getPrivateData); //Add protect when you need a token to access it
+const checkAuth = require('../middleware/auth');
+
+const router = express.Router();
+
+router.use(checkAuth);
+
+router.get("/", getPrivateData); //Esto solo se agrega para tener algo que mostrar en el path de / en el get
+
+router.get('/notes/:nid', notesController.getNoteById);
+
+router.get('/user/:uid', notesController.getNotesByUserId);
+
+router.route("/notes").post(notesController.createNote);
 
 module.exports = router;
