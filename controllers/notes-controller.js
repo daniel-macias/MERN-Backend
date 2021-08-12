@@ -110,6 +110,96 @@ const createNote = async (req, res, next) => {
   res.status(201).json({ note: createdNote });
 };
 
+//Updates a Note
+const updateNote = async (req, res, next) => {
+
+  const { title, description } = req.body;
+  const noteId = req.params.nid;
+
+  let note;
+  try {
+    note = await Note.findById(noteId);
+  } catch (err) {
+    const error = new HttpError(
+      'Something went wrong, could not update note.',
+      500
+    );
+    return next(error);
+  }
+
+  if (note.creator.toString() !== req.userData.userId) {
+    const error = new HttpError('You are not allowed to edit this note.', 401);
+    return next(error);
+  }
+
+  note.title = title;
+  note.description = description;
+
+  try {
+    await note.save();
+  } catch (err) {
+    const error = new HttpError(
+      'Something went wrong, could not update note.',
+      500
+    );
+    return next(error);
+  }
+
+  res.status(200).json({ note: note.toObject({ getters: true }) });
+};
+
+//Deletes a Note
+const deleteNote = async (req, res, next) => {
+  const noteId = req.params.nid;
+
+  let note;
+  try {
+    note = await Note.findById(noteId).populate('creator');
+  } catch (err) {
+    const error = new HttpError(
+      'Something went wrong, could not delete note.',
+      500
+    );
+    return next(error);
+  }
+
+  if (!note) {
+    const error = new HttpError('Could not find note for this id.', 404);
+    return next(error);
+  }
+
+  if (note.creator.id !== req.userData.userId) {
+    const error = new HttpError(
+      'You are not allowed to delete this note.',
+      401
+    );
+    return next(error);
+  }
+
+  try {
+    const sess = await mongoose.startSession();
+    sess.startTransaction();
+    console.log("AAAA", note.creator);
+    console.log("xd");
+    await note.remove({ session: sess });
+    console.log("jajaja");
+    note.creator.notes.pull(note);
+    console.log("BBBBBBB", note.creator);
+    await note.creator.save({ session: sess });
+    await sess.commitTransaction();
+  } catch (err) {
+    const error = new HttpError(
+      'Something went wrong, could not delete note.',
+      500
+    );
+    return next(error);
+  }
+
+  res.status(200).json({ message: 'Deleted note.' });
+};
+
 exports.getNoteById = getNoteById;
 exports.createNote = createNote;
 exports.getNotesByUserId = getNotesByUserId;
+exports.updateNote = updateNote;
+exports.deleteNote = deleteNote;

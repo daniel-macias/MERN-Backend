@@ -16,4 +16,9 @@ router.get('/user/:uid', notesController.getNotesByUserId);
 
 router.route("/notes").post(notesController.createNote);
 
+
+router.route("/notes/:nid").patch(notesController.updateNote);
+  
+router.delete('/notes/:nid', notesController.deleteNote);
+
 module.exports = router;
