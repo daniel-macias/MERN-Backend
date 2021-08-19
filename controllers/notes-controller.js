@@ -34,7 +34,7 @@ const getNoteById = async (req, res, next) => {
 
 //Find Note based on the user id
 const getNotesByUserId = async (req, res, next) => {
-  const userId = req.params.uid;
+  const userId = req.userData.userId;
   
   let userWithNotes;
   try {

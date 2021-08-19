@@ -12,7 +12,7 @@ router.get("/", getPrivateData); //Esto solo se agrega para tener algo que mostr
 
 router.get('/notes/:nid', notesController.getNoteById);
 
-router.get('/user/:uid', notesController.getNotesByUserId);
+router.get('/user/', notesController.getNotesByUserId);
 
 router.route("/notes").post(notesController.createNote);
 
