@@ -113,7 +113,7 @@ const createNote = async (req, res, next) => {
 //Updates a Note
 const updateNote = async (req, res, next) => {
 
-  const { title, description } = req.body;
+  const { title, body } = req.body;
   const noteId = req.params.nid;
 
   let note;
@@ -133,7 +133,7 @@ const updateNote = async (req, res, next) => {
   }
 
   note.title = title;
-  note.description = description;
+  note.body = body;
 
   try {
     await note.save();
